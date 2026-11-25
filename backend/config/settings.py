@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     # Custom Applications
     'accounts',
     'tickets',
+    'FAQs',
 ]
 
 MIDDLEWARE = [

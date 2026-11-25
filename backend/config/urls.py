@@ -13,9 +13,17 @@ urlpatterns = [
         include("accounts.urls")
     ),
 
+    # Tickets API endpoints
     path(
         "api/v1/", 
         include("tickets.urls")
     ),
+
+    # FAQs API endpoints
+    path(
+        "api/v1/faqs/",
+        include("FAQs.urls")
+    ),
+
 ]
 
