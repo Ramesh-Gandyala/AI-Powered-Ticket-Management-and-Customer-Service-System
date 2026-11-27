@@ -28,6 +28,13 @@ from .services import generate_ticket_id
 
 from django.contrib.auth import get_user_model
 
+from ai_support.services import classify_customer_query
+
+import logging
+
+logger = logging.getLogger(__name__)
+
+
 
 class QuerySubmissionAPIView(APIView):
 
@@ -42,8 +49,23 @@ class QuerySubmissionAPIView(APIView):
 
         if serializer.is_valid():
 
+            customer_message = serializer.validated_data["query"]
+
+            try:
+                predicted_category = classify_customer_query(
+                    customer_message
+                )
+
+            except Exception:
+                logger.exception(
+                    "ULTRON failed to classify the customer query."
+                )
+
+                predicted_category = Query.QueryCategory.GENERAL
+
             query = serializer.save(
-                submitted_by=request.user
+                submitted_by=request.user,
+                category=predicted_category
             )
 
             return Response(
@@ -53,6 +75,7 @@ class QuerySubmissionAPIView(APIView):
                     "data": {
                         "id": query.id,
                         "status": query.status,
+                        "category": query.category,
                     },
                 },
                 status=status.HTTP_201_CREATED,
@@ -65,6 +88,7 @@ class QuerySubmissionAPIView(APIView):
             },
             status=status.HTTP_400_BAD_REQUEST,
         )
+
 
 
 class PendingQueriesAPIView(APIView):

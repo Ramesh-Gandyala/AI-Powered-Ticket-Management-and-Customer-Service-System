@@ -25,5 +25,11 @@ urlpatterns = [
         include("FAQs.urls")
     ),
 
+    # ai_support API endpoints
+    path(
+        "api/v1/ai/", 
+        include("ai_support.urls")
+    ),
+
 ]
 
