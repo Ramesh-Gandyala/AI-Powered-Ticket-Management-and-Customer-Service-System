@@ -11,6 +11,7 @@ from .views import (
     MyTicketsAPIView,
     TicketStatusUpdateAPIView,
     MyTicketProgressAPIView,
+    TicketAssignmentAPIView,
 )
 
 
@@ -67,6 +68,12 @@ urlpatterns = [
         "my-tickets/<str:ticket_id>/progress/",
         MyTicketProgressAPIView.as_view(),
         name="my-ticket-progress",
+    ),
+
+    path(
+        "tickets/<str:ticket_id>/assign/",
+        TicketAssignmentAPIView.as_view(),
+        name="assign-ticket",
     ),
 
 ]

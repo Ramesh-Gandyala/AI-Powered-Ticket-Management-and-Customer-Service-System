@@ -155,3 +155,27 @@ class TicketProgressSerializer(serializers.ModelSerializer):
             "created_at",
         ]
 
+
+class TicketAssignmentSerializer(serializers.Serializer):
+
+    assigned_agent = serializers.IntegerField()
+
+    def validate_assigned_agent(self, value):
+
+        from django.contrib.auth import get_user_model
+
+        User = get_user_model()
+
+        try:
+            agent = User.objects.get(
+                id=value,
+                role="AGENT",
+                is_active=True
+            )
+
+        except User.DoesNotExist:
+            raise serializers.ValidationError(
+                "Selected Agent does not exist or is inactive."
+            )
+
+        return value

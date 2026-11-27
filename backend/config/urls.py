@@ -31,5 +31,11 @@ urlpatterns = [
         include("ai_support.urls")
     ),
 
+    # Notifications API endpoints
+    path(
+        "api/v1/",
+        include("notifications.urls")
+    ),
+
 ]
 

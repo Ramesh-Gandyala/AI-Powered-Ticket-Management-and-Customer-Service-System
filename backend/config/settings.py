@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'tickets',
     'FAQs',
     'ai_support',
+    'notifications',
 ]
 
 MIDDLEWARE = [
@@ -135,11 +136,9 @@ STATIC_URL = 'static/'
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
-MAILERS = {
-    'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
-    },
-}
+# Email Configuration
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 DEFAULT_FROM_EMAIL = 'support@example.com'
 

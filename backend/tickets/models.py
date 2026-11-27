@@ -50,6 +50,7 @@ class Ticket(models.Model):
         OPEN = "OPEN", "Open"
         IN_PROGRESS = "IN_PROGRESS", "In Progress"
         CLOSED = "CLOSED", "Closed"
+        RESOLVED = "RESOLVED", "Resolved"
 
     ticket_id = models.CharField(
         max_length=30,
