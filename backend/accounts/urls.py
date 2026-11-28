@@ -10,6 +10,7 @@ from .views import (
     CustomerEmailVerificationAPIView,
     CustomerRegistrationAPIView,
     CustomerLoginAPIView,
+    GoogleLoginAPIView,
 )
 
 
@@ -60,5 +61,11 @@ urlpatterns = [
         "customer/login/",
         CustomerLoginAPIView.as_view(),
         name="customer-login"
+    ),
+
+    path(
+        "google/login/",
+        GoogleLoginAPIView.as_view(),
+        name="google-login"
     ),
 ]

@@ -7,6 +7,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 
+from .google_auth import verify_google_token
+
 
 User = get_user_model()
 
@@ -348,3 +350,73 @@ class CustomerRegistrationSerializer(serializers.Serializer):
         customer.save()
 
         return customer
+
+
+
+class GoogleLoginSerializer(serializers.Serializer):
+
+    token = serializers.CharField(write_only=True)
+
+    def validate(self, attrs):
+
+        # Step 1: Verify the Google ID token
+        google_user = verify_google_token(attrs["token"])
+
+        if not google_user:
+            raise serializers.ValidationError(
+                "Invalid or expired Google authentication token."
+            )
+
+        email = google_user["email"].lower()
+
+        # Step 2: Find an existing account using verified email
+        user = User.objects.filter(
+            email__iexact=email
+        ).first()
+
+        if user:
+
+            # Step 3: Ensure the existing role is permitted
+            if user.role not in [
+                User.Role.ADMIN,
+                User.Role.AGENT,
+                User.Role.CUSTOMER,
+            ]:
+                raise serializers.ValidationError(
+                    "This account is not permitted to use Google login."
+                )
+
+            # Step 4: Never automatically activate inactive accounts
+            if not user.is_active:
+                raise serializers.ValidationError(
+                    "Your account is inactive. Please contact support."
+                )
+
+        else:
+
+            # Step 5: New Google registrations are Customers only
+            base_username = email.split("@")[0]
+            username = base_username
+            counter = 1
+
+            while User.objects.filter(
+                username__iexact=username
+            ).exists():
+                username = f"{base_username}{counter}"
+                counter += 1
+
+            # Step 6: Create a new verified Customer account
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                first_name=google_user.get("name", "").split(" ")[0],
+                role=User.Role.CUSTOMER,
+                is_active=True,
+                is_email_verified=True,
+                password=None,
+            )
+
+        # Step 7: Store the authenticated user
+        attrs["user"] = user
+
+        return attrs

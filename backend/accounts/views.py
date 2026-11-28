@@ -20,6 +20,7 @@ from .serializers import (
     AgentRegistrationSerializer,
     CustomerRegistrationSerializer,
     CustomerLoginSerializer,
+     GoogleLoginSerializer,
 )
 
 from .email_utils import (
@@ -500,3 +501,56 @@ class CustomerLoginAPIView(APIView):
             },
             status=status.HTTP_200_OK
         )
+
+
+class GoogleLoginAPIView(APIView):
+
+    authentication_classes = []
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+
+        # Step 1: Validate the Google ID token
+        serializer = GoogleLoginSerializer(data=request.data)
+
+        if not serializer.is_valid():
+            return Response(
+                {
+                    "success": False,
+                    "message": "Google login failed.",
+                    "errors": serializer.errors
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Step 2: Get the authenticated user
+        user = serializer.validated_data["user"]
+
+        # Step 3: Generate JWT tokens
+        refresh = RefreshToken.for_user(user)
+        access = refresh.access_token
+
+        # Step 4: Prepare user details
+        user_details = {
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "role": user.role
+        }
+
+        # Step 5: Return successful response
+        return Response(
+            {
+                "success": True,
+                "message": "Google login successful.",
+                "tokens": {
+                    "refresh": str(refresh),
+                    "access": str(access)
+                },
+                "user": user_details
+            },
+            status=status.HTTP_200_OK
+        )
+
